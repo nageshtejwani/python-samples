@@ -2,7 +2,7 @@ import pandas as pd
 
 # Original DataFrame
 data = {
-    "Date": ["2023-01-01", "2023-01-03", "2023-01-05"],
+    "Date": ["2023-01-01", "2023-01-03", "2023-01-04"],
     "Value": [10, 20, 15]
 }
 df = pd.DataFrame(data)
@@ -10,19 +10,17 @@ df = pd.DataFrame(data)
 # Convert 'Date' column to datetime
 df["Date"] = pd.to_datetime(df["Date"])
 
-# Get the start (Monday) and end (Sunday) of the current week
-current_date = pd.Timestamp.now()  # Today's date
-start_of_week = current_date - pd.Timedelta(days=current_date.weekday())  # Monday
-end_of_week = start_of_week + pd.Timedelta(days=6)  # Sunday
+# Get the latest date in the current DataFrame
+latest_date = df["Date"].max()
 
-# Generate full date range for the current week
-current_week_dates = pd.date_range(start=start_of_week, end=end_of_week)
+# Generate the next 10 days from the latest date
+next_10_days = pd.date_range(start=latest_date + pd.Timedelta(days=1), periods=10, freq='D')
 
-# Reindex the DataFrame to include all dates for the current week
-df = df.set_index("Date").reindex(current_week_dates, fill_value=0)
+# Create a DataFrame for the next 10 days with dummy value
+dummy_data = pd.DataFrame({"Date": next_10_days, "Value": [0] * 10})
 
-# Reset the index and rename the index column back to 'Date'
-df = df.reset_index().rename(columns={"index": "Date"})
+# Concatenate the new dummy data to the original DataFrame
+df = pd.concat([df, dummy_data], ignore_index=True)
 
 # Output the resulting DataFrame
 print(df)
