@@ -2,7 +2,7 @@ import pandas as pd
 
 # Original DataFrame
 data = {
-    "Date": ["2023-01-01", "2023-01-03", "2023-01-04"],
+    "Date": ["2023-01-01", "2023-01-03", "2023-01-05"],
     "Value": [10, 20, 15]
 }
 df = pd.DataFrame(data)
@@ -10,19 +10,19 @@ df = pd.DataFrame(data)
 # Convert 'Date' column to datetime
 df["Date"] = pd.to_datetime(df["Date"])
 
-# Calculate yesterday's date
-yesterdays_date = pd.Timestamp.now().normalize() - pd.Timedelta(days=1)
+# Get the start (Monday) and end (Sunday) of the current week
+current_date = pd.Timestamp.now()  # Today's date
+start_of_week = current_date - pd.Timedelta(days=current_date.weekday())  # Monday
+end_of_week = start_of_week + pd.Timedelta(days=6)  # Sunday
 
-# Check if yesterday's date already exists to avoid duplicates
-if yesterdays_date not in df["Date"].values:
-    # Create a new row for yesterday with Value = 0
-    dummy_row = pd.DataFrame({"Date": [yesterdays_date], "Value": [0]})
+# Generate full date range for the current week
+current_week_dates = pd.date_range(start=start_of_week, end=end_of_week)
 
-    # Append the dummy row to the existing DataFrame
-    df = pd.concat([df, dummy_row], ignore_index=True)
+# Reindex the DataFrame to include all dates for the current week
+df = df.set_index("Date").reindex(current_week_dates, fill_value=0)
 
-# Sort the DataFrame by date
-df = df.sort_values(by="Date").reset_index(drop=True)
+# Reset the index and rename the index column back to 'Date'
+df = df.reset_index().rename(columns={"index": "Date"})
 
 # Output the resulting DataFrame
 print(df)
