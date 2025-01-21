@@ -22,6 +22,11 @@ spec:
         env:
         - name: FLASK_ENV
           value: "development"
+        envFrom:
+        - secretRef:
+            name: artifactory-secret
+      imagePullSecrets:
+      - name: regcred
 ---
 apiVersion: v1
 kind: Service
